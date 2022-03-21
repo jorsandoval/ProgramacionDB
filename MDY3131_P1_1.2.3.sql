@@ -70,10 +70,11 @@ EXEC :b_aumento_comuna_5:=40000;
 
 --Declaracion de variable escalar
 DECLARE
-v_filas_actualizadas VARCHAR2(25);
+v_filas_actualizadas VARCHAR2(50);
 
 --Inicio del bloquea anonimo
 BEGIN
+    --Inserta los resultados de la consulta en tabla PROY_MOVILIZACION
     INSERT INTO PROY_MOVILIZACION
     SELECT
         :b_annio_proceso as ANNO_PROCESO,
@@ -113,8 +114,12 @@ BEGIN
         END AS VALOR_TOTAL_MOVIL
     FROM empleado e INNER JOIN comuna c ON (e.id_comuna=c.id_comuna)
     WHERE e.NUMRUN_EMP = :b_run_empleado;
-    v_filas_actualizadas:=(SQL%ROWCOUNT||' fila(s) Insertada(s).');
+    
+    --Consulta cuantas filas han sido modificadas 
+    v_filas_actualizadas:=(SQL%ROWCOUNT||' fila(s) Insertada(s) correctamente.');
+    --Imprime el mensaje por pantalla
     DBMS_OUTPUT.PUT_LINE(v_filas_actualizadas);
+    
 --Si todo ha salido bien, realiza una confirmación y guarda la inserción en la base
 COMMIT;
 --Finaliza el bloque anonimo
@@ -125,5 +130,10 @@ END;
 --TRUNCATE TABLE PROY_MOVILIZACION;
 --DELETE FROM PROY_MOVILIZACION WHERE NUMRUN_EMP = 12868553;
 
+----------------------------------------------- Caso 2 -----------------------------------------------
+SET SERVEROUTPUT ON
 
+VARIABLE b_run_empleado NUMBER;
+
+EXEC
 
