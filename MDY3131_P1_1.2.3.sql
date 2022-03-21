@@ -26,7 +26,7 @@ Buin
 VARIABLE b_annio_proceso NUMBER;
 VARIABLE b_run_empleado NUMBER;
 
---Declaracion de Variables bidn para comunas que se les paga movilización adicional
+--Declaracion de Variables bind para comunas que se les paga movilización adicional
 VARIABLE b_nombre_comuna_1 VARCHAR2(25);
 VARIABLE b_nombre_comuna_2 VARCHAR2(25);
 VARIABLE b_nombre_comuna_3 VARCHAR2(25);
@@ -125,7 +125,7 @@ COMMIT;
 --Finaliza el bloque anonimo
 END;
 
---Usadas para la revisión
+--Usadas para la revisión y validación de bloque
 --SELECT * FROM PROY_MOVILIZACION;
 --TRUNCATE TABLE PROY_MOVILIZACION;
 --DELETE FROM PROY_MOVILIZACION WHERE NUMRUN_EMP = 12868553;
@@ -133,7 +133,91 @@ END;
 ----------------------------------------------- Caso 2 -----------------------------------------------
 SET SERVEROUTPUT ON
 
+--Declaración de Variable Bind para el rut de empleado
 VARIABLE b_run_empleado NUMBER;
+--Solicitud de rut empleado de forma parametrica
+EXEC :b_run_empleado:=&Rut_Empleado;
 
-EXEC
+--Declaración de variable escalar
+DECLARE
+v_registro_actualizado VARCHAR2(50);
+v_mes_anno NUMBER(6);
+v_numrun_emp NUMBER(10);
+v_dvrun_emp VARCHAR2(1);
+v_nombre_empleado VARCHAR2(60);
+v_nombre_usuario VARCHAR2(20);
+v_clave_usuario VARCHAR2(20);
+
+--Inicio de bloque anonimo
+BEGIN
+    SELECT
+        TO_CHAR(SYSDATE,'MMYYYY'),
+        e.numrun_emp,
+        e.dvrun_emp,
+        e.pnombre_emp||' '||e.snombre_emp||' '||e.appaterno_emp||' '||e.apmaterno_emp,
+        CASE
+            WHEN TRUNC(MONTHS_BETWEEN(SYSDATE,e.fecha_contrato)/12) < 9 THEN
+                SUBSTR(e.pnombre_emp,1,3) || LENGTH(e.pnombre_emp) || '*' || SUBSTR(e.sueldo_base,-1) || e.dvrun_emp || ROUND(MONTHS_BETWEEN(SYSDATE,e.fecha_contrato)/12) || 'X'
+            ELSE
+                SUBSTR(e.pnombre_emp,1,3) || LENGTH(e.pnombre_emp) || '*' || SUBSTR(e.sueldo_base,-1) || e.dvrun_emp || ROUND(MONTHS_BETWEEN(SYSDATE,e.fecha_contrato)/12)
+        END,
+        CASE
+            WHEN e.id_estado_civil = 10 THEN
+              SUBSTR(e.numrun_emp,3,1) || EXTRACT(YEAR FROM e.fecha_nac)+2 || SUBSTR((e.sueldo_base-1),-3) || LOWER(SUBSTR(e.appaterno_emp,1,2)) || TO_CHAR(SYSDATE,'MMYYYY') || SUBSTR(c.nombre_comuna,1,1)
+            WHEN e.id_estado_civil = 60 THEN
+              SUBSTR(e.numrun_emp,3,1) || EXTRACT(YEAR FROM e.fecha_nac)+2 || SUBSTR((e.sueldo_base-1),-3) || LOWER(SUBSTR(e.appaterno_emp,1,2)) || TO_CHAR(SYSDATE,'MMYYYY') || SUBSTR(c.nombre_comuna,1,1)
+            WHEN e.id_estado_civil LIKE 20 THEN
+                SUBSTR(e.numrun_emp,3,1) || EXTRACT(YEAR FROM e.fecha_nac)+2 || SUBSTR((e.sueldo_base-1),-3) || LOWER(SUBSTR(e.appaterno_emp,1,1)) || LOWER(SUBSTR(e.appaterno_emp,-1)) || TO_CHAR(SYSDATE,'MMYYYY') || SUBSTR(c.nombre_comuna,1,1)
+            WHEN e.id_estado_civil LIKE 30 THEN
+                SUBSTR(e.numrun_emp,3,1) || EXTRACT(YEAR FROM e.fecha_nac)+2 || SUBSTR((e.sueldo_base-1),-3) || LOWER(SUBSTR(e.appaterno_emp,1,1)) || LOWER(SUBSTR(e.appaterno_emp,-1)) || TO_CHAR(SYSDATE,'MMYYYY') || SUBSTR(c.nombre_comuna,1,1)
+            WHEN e.id_estado_civil LIKE 40 THEN
+                SUBSTR(e.numrun_emp,3,1) || EXTRACT(YEAR FROM e.fecha_nac)+2 || SUBSTR((e.sueldo_base-1),-3) || LOWER(SUBSTR(e.appaterno_emp,-3,2)) || TO_CHAR(SYSDATE,'MMYYYY') || SUBSTR(c.nombre_comuna,1,1)
+            ELSE
+                SUBSTR(e.numrun_emp,3,1) || EXTRACT(YEAR FROM e.fecha_nac)+2 || SUBSTR((e.sueldo_base-1),-3) || LOWER(SUBSTR(e.appaterno_emp,-2,2)) || TO_CHAR(SYSDATE,'MMYYYY') || SUBSTR(c.nombre_comuna,1,1)
+        END
+    INTO
+        v_mes_anno,
+        v_numrun_emp,
+        v_dvrun_emp,
+        v_nombre_empleado,
+        v_nombre_usuario,
+        v_clave_usuario
+    FROM
+        empleado e INNER JOIN comuna c ON (e.id_comuna=c.id_comuna)
+    WHERE
+       numrun_emp = :b_run_empleado ;
+    
+    --Inserta valores de la consulta a tabla 
+    INSERT INTO 
+        USUARIO_CLAVE
+    VALUES
+        (   v_mes_anno,
+            v_numrun_emp,
+            v_dvrun_emp,
+            v_nombre_empleado,
+            v_nombre_usuario,
+            v_clave_usuario
+        );
+    
+    --Consulta cuantas filas han sido modificadas
+    v_registro_actualizado:=(SQL%ROWCOUNT||' fila(s) Insertada(s) correctamente.');
+    --Imprime en pantalla la confirmación
+    DBMS_OUTPUT.PUT_LINE(v_registro_actualizado);
+    
+--Si todo ha salido bien, guarda las inserciones a la Base    
+COMMIT;
+END;
+
+/*
+--Validación de carga
+Select * From USUARIO_CLAVE;
+TRUNCATE TABLE USUARIO_CLAVE;
+SELECT id_estado_civil FROM empleado WHERE numrun_emp = 12648200;
+SELECT id_estado_civil FROM empleado WHERE numrun_emp = 12260812;
+SELECT id_estado_civil FROM empleado WHERE numrun_emp = 12456905;
+SELECT id_estado_civil FROM empleado WHERE numrun_emp = 11649964;
+SELECT id_estado_civil FROM empleado WHERE numrun_emp = 12642309;
+*/
+----------------------------------------------- Caso 2 -----------------------------------------------
+--Pronto...
 
