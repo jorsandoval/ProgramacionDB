@@ -246,7 +246,8 @@ v_filas_actualizadas VARCHAR2(160);
 v_valor_arriendo_dia_ajustado NUMBER;
 v_valor_garantia_dia_ajustado NUMBER;
 
-BEGIN
+BEGIN ---Inicio de bloquea anonimo
+    --Esta consulta almacena sus valores en las variables escalares creadas
     SELECT
         :b_anno_proceso,
         :b_patente_camion,
@@ -271,7 +272,7 @@ BEGIN
     c.valor_arriendo_dia,
     c.valor_garantia_dia;
     
-    --Inserta los valores para las patentes consultadas
+    --Inserta los valores de las variables escalares a la tabla HIST_ARRIENDO_ANUAL_CAMION según la patente que se vaya ingresando
     INSERT INTO 
         HIST_ARRIENDO_ANUAL_CAMION
     VALUES
@@ -281,42 +282,32 @@ BEGIN
     v_filas_Insertadas:=(SQL%ROWCOUNT||' fila(s) Insertada(s) correctamente en HIST_ARRIENDO_ANUAL_CAMION.');
     --Imprime el mensaje por pantalla
     DBMS_OUTPUT.PUT_LINE(v_filas_Insertadas);
-    
+
+    --Si existen camiones que tienen menos de 5 arriendos en el año, se actualiza su valor de arriendo dia y garantia dia
    IF v_total_veces_arrendado <= 4 THEN
+        --Aquí se calcula según el % ingresado de forma parametrica en la variable Bind
         v_valor_arriendo_dia_ajustado:=ROUND((v_valor_arriendo_dia * (100 - :b_porcentaje_rebaja))/100);
         v_valor_garantia_dia_ajustado:=ROUND((v_valor_garantia_dia * (100 - :b_porcentaje_rebaja))/100);
-        
+        --Se actualiza el valor arriendo dia y valor garantia dia a partir de la patente ingresada de forma parametrica
         UPDATE CAMION
         SET VALOR_ARRIENDO_DIA = v_valor_arriendo_dia_ajustado, VALOR_GARANTIA_DIA = v_valor_garantia_dia_ajustado
         WHERE nro_patente = :b_patente_camion;
+        
+        --Consulta cuantas filas han sido Actulizadas 
+        v_filas_actualizadas:=(SQL%ROWCOUNT ||' fila(s) actualizada(s) correctamente en camion.');
+        --Imprime el mensaje por pantalla
+        DBMS_OUTPUT.PUT_LINE(v_filas_actualizadas);
     END IF;
-    
-    --Consulta cuantas filas han sido Actulizadas 
-    v_filas_actualizadas:=(SQL%ROWCOUNT ||' fila(s) actualizada(s) correctamente en tabla camion.');
-    --Imprime el mensaje por pantalla
-    DBMS_OUTPUT.PUT_LINE(v_filas_actualizadas);
-    
+--si todo ha resultado bien, guarda los cambios    
 COMMIT;
-END;
+END; --Finaliza el bloquea anonimo
 
-   --Consulta cuantas filas han sido Actulizadas 
-    v_filas_actualizadas:=(SQL%FOUND ||' fila(s) actualizada(s) correctamente.');
-    --Imprime el mensaje por pantalla
-    DBMS_OUTPUT.PUT_LINE(v_filas_actualizadas);
-   
-COMMIT;
-END;
-
-
+/* --sentencias de prueba
 --SELECT * FROM camion;
 SELECT * FROM HIST_ARRIENDO_ANUAL_CAMION;
 TRUNCATE TABLE HIST_ARRIENDO_ANUAL_CAMION;
-SELECT * FROM camion  WHERE nro_patente = 'ASEZ11';
---SELECT * FROM camion;
-
-UPDATE CAMION
-        SET VALOR_ARRIENDO_DIA = 14500
-        WHERE nro_patente = 'ASEZ11';
+SELECT * FROM camion WHERE nro_patente IN ( 'AHEW11','ASEZ11','BC1002', 'BT1002','VR1003');
+UPDATE CAMION SET VALOR_ARRIENDO_DIA = 14500 WHERE nro_patente = 'ASEZ11';
 ----------------------------------------------- Caso 4 -----------------------------------------------
 
 
