@@ -234,7 +234,6 @@ EXEC :b_anno_proceso:=&ANNO_PROCESO;
 EXEC :b_patente_camion:=UPPER('&Patente_camión');
 EXEC :b_porcentaje_rebaja:=&Porcentaje_rebaja_con_punto_sin_comas;
 
------------------------------------Inicio bloque Padre------------------------------------------
 --Declara las variables escalares
 DECLARE
 v_anno_proceso NUMBER;
@@ -242,7 +241,10 @@ v_nro_patente_p VARCHAR2(6);
 v_valor_arriendo_dia NUMBER;
 v_valor_garantia_dia NUMBER;
 v_total_veces_arrendado NUMBER;
-v_filas_Insertadas_p VARCHAR2(160);
+v_filas_Insertadas VARCHAR2(160);
+v_filas_actualizadas VARCHAR2(160);
+v_valor_arriendo_dia_ajustado NUMBER;
+v_valor_garantia_dia_ajustado NUMBER;
 
 BEGIN
     SELECT
@@ -275,52 +277,47 @@ BEGIN
     VALUES
         (v_anno_proceso, v_nro_patente_p, v_valor_arriendo_dia, v_valor_garantia_dia, v_total_veces_arrendado);
     
-    --Consulta cuantas filas han sido modificadas 
-    v_filas_Insertadas_p:=(SQL%ROWCOUNT||' fila(s) Insertada(s) correctamente en HIST_ARRIENDO_ANUAL_CAMION.');
+    --Consulta cuantas filas han sido insertadas 
+    v_filas_Insertadas:=(SQL%ROWCOUNT||' fila(s) Insertada(s) correctamente en HIST_ARRIENDO_ANUAL_CAMION.');
     --Imprime el mensaje por pantalla
-    DBMS_OUTPUT.PUT_LINE(v_filas_Insertadas_p);
+    DBMS_OUTPUT.PUT_LINE(v_filas_Insertadas);
     
-    -----------------------------------Inicio bloque Hijo------------------------------------------
-    DECLARE
-    v_nro_patente_h VARCHAR2(6); 
-    v_valor_arriendo_dia_ajustado NUMBER;
-    v_valor_garantia_dia_ajustado NUMBER;
-    v_filas_Insertadas_h VARCHAR2(160);
-    
-    BEGIN 
-        SELECT
-            nro_patente,
-            ROUND((valor_arriendo_dia * (100 - :b_porcentaje_rebaja))/100),
-            ROUND((valor_garantia_dia * (100 - :b_porcentaje_rebaja))/100)
-        INTO
-            v_nro_patente_h,
-            v_valor_arriendo_dia_ajustado,
-            v_valor_garantia_dia_ajustado
-        FROM
-            HIST_ARRIENDO_ANUAL_CAMION
-        WHERE
-            total_veces_arrendado < 5;
+   IF v_total_veces_arrendado <= 4 THEN
+        v_valor_arriendo_dia_ajustado:=ROUND((v_valor_arriendo_dia * (100 - :b_porcentaje_rebaja))/100);
+        v_valor_garantia_dia_ajustado:=ROUND((v_valor_garantia_dia * (100 - :b_porcentaje_rebaja))/100);
         
         UPDATE CAMION
         SET VALOR_ARRIENDO_DIA = v_valor_arriendo_dia_ajustado, VALOR_GARANTIA_DIA = v_valor_garantia_dia_ajustado
-        WHERE nro_patente = v_nro_patente_h;
-        
-        --Consulta cuantas filas han sido modificadas 
-        v_filas_Insertadas_h:=(SQL%ROWCOUNT||' fila(s) Insertada(s) correctamente en CAMION.');
-        --Imprime el mensaje por pantalla
-        DBMS_OUTPUT.PUT_LINE(v_filas_Insertadas_h);
-        
-    END;
-     -----------------------------------Fin bloque Hijo------------------------------------------
---Permite guardar los cambios realizados
+        WHERE nro_patente = :b_patente_camion;
+    END IF;
+    
+    --Consulta cuantas filas han sido Actulizadas 
+    v_filas_actualizadas:=(SQL%ROWCOUNT ||' fila(s) actualizada(s) correctamente en tabla camion.');
+    --Imprime el mensaje por pantalla
+    DBMS_OUTPUT.PUT_LINE(v_filas_actualizadas);
+    
 COMMIT;
 END;
------------------------------------Fin bloque Padre------------------------------------------
+
+   --Consulta cuantas filas han sido Actulizadas 
+    v_filas_actualizadas:=(SQL%FOUND ||' fila(s) actualizada(s) correctamente.');
+    --Imprime el mensaje por pantalla
+    DBMS_OUTPUT.PUT_LINE(v_filas_actualizadas);
+   
+COMMIT;
+END;
+
+
 --SELECT * FROM camion;
---SELECT * FROM HIST_ARRIENDO_ANUAL_CAMION;
---TRUNCATE TABLE HIST_ARRIENDO_ANUAL_CAMION;
+SELECT * FROM HIST_ARRIENDO_ANUAL_CAMION;
+TRUNCATE TABLE HIST_ARRIENDO_ANUAL_CAMION;
+SELECT * FROM camion  WHERE nro_patente = 'ASEZ11';
 --SELECT * FROM camion;
 
+UPDATE CAMION
+        SET VALOR_ARRIENDO_DIA = 14500
+        WHERE nro_patente = 'ASEZ11';
+----------------------------------------------- Caso 4 -----------------------------------------------
 
 
 
