@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------------------------------
---                        Jorge Sandoval - MDY3131_002V - Programación de Base de Datos
+--                        Jorge Sandoval - MDY3131_002V - ProgramaciÃ³n de Base de Datos
 ----------------------------------------------- Caso 1 -----------------------------------------------
 SET SERVEROUTPUT ON
 
@@ -12,9 +12,9 @@ SET SERVEROUTPUT ON
 
 2022
 
-María Pinto
+MarÃ­a Pinto
 20000
-Curacaví
+CuracavÃ­
 25000
 Talagante
 30000
@@ -24,18 +24,18 @@ Buin
 40000
 */
 
---Declaracion de variables bind Año proceso y Run emplado
+--Declaracion de variables bind AÃ±o proceso y Run emplado
 VARIABLE b_annio_proceso NUMBER;
 VARIABLE b_run_empleado NUMBER;
 
---Declaracion de Variables bind para comunas que se les paga movilización adicional
+--Declaracion de Variables bind para comunas que se les paga movilizaciÃ³n adicional
 VARIABLE b_nombre_comuna_1 VARCHAR2(25);
 VARIABLE b_nombre_comuna_2 VARCHAR2(25);
 VARIABLE b_nombre_comuna_3 VARCHAR2(25);
 VARIABLE b_nombre_comuna_4 VARCHAR2(25);
 VARIABLE b_nombre_comuna_5 VARCHAR2(25);
 
---Declaracion de variables bind para el adicional por comuna con movilización extra
+--Declaracion de variables bind para el adicional por comuna con movilizaciÃ³n extra
 VARIABLE b_aumento_comuna_1 NUMBER;
 VARIABLE b_aumento_comuna_2 NUMBER;
 VARIABLE b_aumento_comuna_3 NUMBER;
@@ -44,23 +44,23 @@ VARIABLE b_aumento_comuna_5 NUMBER;
 
 --Solicitud parametrica para variables bind
 EXEC :b_run_empleado:=&Ingresar_run_empleado;
-EXEC :b_annio_proceso:=&Ingrese_año_actual;
+EXEC :b_annio_proceso:=&Ingrese_aÃ±o_actual;
 EXEC :b_nombre_comuna_1:='&Ingrese_nombre_comuna_1_de_5';
-EXEC :b_aumento_comuna_1:=&Ingrese_Movilización_adicional_Comuna_1_de_5;
+EXEC :b_aumento_comuna_1:=&Ingrese_MovilizaciÃ³n_adicional_Comuna_1_de_5;
 EXEC :b_nombre_comuna_2:='&Ingrese_nombre_comuna_2_de_5';
-EXEC :b_aumento_comuna_2:=&Ingrese_Movilización_adicional_Comuna_2_de_5;
+EXEC :b_aumento_comuna_2:=&Ingrese_MovilizaciÃ³n_adicional_Comuna_2_de_5;
 EXEC :b_nombre_comuna_3:='&Ingrese_nombre_comuna_3_de_5';
-EXEC :b_aumento_comuna_3:=&Ingrese_Movilización_adicional_Comuna_3_de_5;
+EXEC :b_aumento_comuna_3:=&Ingrese_MovilizaciÃ³n_adicional_Comuna_3_de_5;
 EXEC :b_nombre_comuna_4:='&Ingrese_nombre_comuna_4_de_5';
-EXEC :b_aumento_comuna_4:=&Ingrese_Movilización_adicional_Comuna_4_de_5;
+EXEC :b_aumento_comuna_4:=&Ingrese_MovilizaciÃ³n_adicional_Comuna_4_de_5;
 EXEC :b_nombre_comuna_5:='&Ingrese_nombre_comuna_5_de_5';
-EXEC :b_aumento_comuna_5:=&Ingrese_Movilización_adicional_Comuna_5_de_5;
+EXEC :b_aumento_comuna_5:=&Ingrese_MovilizaciÃ³n_adicional_Comuna_5_de_5;
 
-/*--Habilitarlo solo para quitar la opción parametrica y deshabilitar desde la linea 45 a la 55.
+/*--Habilitarlo solo para quitar la opciÃ³n parametrica y deshabilitar desde la linea 45 a la 55.
 EXEC :b_annio_proceso:=2022;
-EXEC :b_nombre_comuna_1:='María Pinto';
+EXEC :b_nombre_comuna_1:='MarÃ­a Pinto';
 EXEC :b_aumento_comuna_1:=20000;
-EXEC :b_nombre_comuna_2:='Curacaví';
+EXEC :b_nombre_comuna_2:='CuracavÃ­';
 EXEC :b_aumento_comuna_2:=25000;
 EXEC :b_nombre_comuna_3:='Talagante';
 EXEC :b_aumento_comuna_3:=30000;
@@ -122,12 +122,12 @@ BEGIN
     --Imprime el mensaje por pantalla
     DBMS_OUTPUT.PUT_LINE(v_filas_actualizadas);
     
---Si todo ha salido bien, realiza una confirmación y guarda la inserción en la base
+--Si todo ha salido bien, realiza una confirmaciÃ³n y guarda la inserciÃ³n en la base
 COMMIT;
 --Finaliza el bloque anonimo
 END;
 
---Usadas para la revisión y validación de bloque
+--Usadas para la revisiÃ³n y validaciÃ³n de bloque
 --SELECT * FROM PROY_MOVILIZACION;
 --TRUNCATE TABLE PROY_MOVILIZACION;
 --DELETE FROM PROY_MOVILIZACION WHERE NUMRUN_EMP = 12868553;
@@ -135,12 +135,12 @@ END;
 ----------------------------------------------- Caso 2 -----------------------------------------------
 SET SERVEROUTPUT ON
 
---Declaración de Variable Bind para el rut de empleado
+--DeclaraciÃ³n de Variable Bind para el rut de empleado
 VARIABLE b_run_empleado NUMBER;
 --Solicitud de rut empleado de forma parametrica
 EXEC :b_run_empleado:=&Rut_Empleado;
 
---Declaración de variable escalar
+--DeclaraciÃ³n de variable escalar
 DECLARE
 v_registro_actualizado VARCHAR2(50);
 v_mes_anno NUMBER(6);
@@ -152,7 +152,7 @@ v_clave_usuario VARCHAR2(20);
 
 --Inicio de bloque anonimo
 BEGIN
-    --En el siguiente Select se obtiene la información del empleado a partir del rut y se genera el usuario y clave según las condiciones de negocio informadas.
+    --En el siguiente Select se obtiene la informaciÃ³n del empleado a partir del rut y se genera el usuario y clave segÃºn las condiciones de negocio informadas.
     SELECT
         TO_CHAR(SYSDATE,'MMYYYY'),
         e.numrun_emp,
@@ -204,7 +204,7 @@ BEGIN
     
     --Consulta cuantas filas han sido modificadas
     v_registro_actualizado:=(SQL%ROWCOUNT||' fila(s) Insertada(s) correctamente.');
-    --Imprime en pantalla la confirmación
+    --Imprime en pantalla la confirmaciÃ³n
     DBMS_OUTPUT.PUT_LINE(v_registro_actualizado);
     
 --Si todo ha salido bien, guarda las inserciones a la Base    
@@ -212,7 +212,7 @@ COMMIT;
 END;
 
 /*
---Validación de carga
+--ValidaciÃ³n de carga
 Select * From USUARIO_CLAVE;
 TRUNCATE TABLE USUARIO_CLAVE;
 SELECT id_estado_civil FROM empleado WHERE numrun_emp = 12648200;
@@ -224,14 +224,14 @@ SELECT id_estado_civil FROM empleado WHERE numrun_emp = 12642309;
 ----------------------------------------------- Caso 3 -----------------------------------------------
 SET SERVEROUTPUT ON
 
---Declaración de variables bind
+--DeclaraciÃ³n de variables bind
 VARIABLE b_anno_proceso NUMBER;
 VARIABLE b_patente_camion VARCHAR2(7);
 VARIABLE b_porcentaje_rebaja NUMBER;
 
---Asignación de valores de forma parametrica a variables bind
+--AsignaciÃ³n de valores de forma parametrica a variables bind
 EXEC :b_anno_proceso:=&ANNO_PROCESO;
-EXEC :b_patente_camion:=UPPER('&Patente_camión');
+EXEC :b_patente_camion:=UPPER('&Patente_camiÃ³n');
 EXEC :b_porcentaje_rebaja:=&Porcentaje_rebaja_con_punto_sin_comas;
 
 --Declara las variables escalares
@@ -272,7 +272,7 @@ BEGIN ---Inicio de bloquea anonimo
     c.valor_arriendo_dia,
     c.valor_garantia_dia;
     
-    --Inserta los valores de las variables escalares a la tabla HIST_ARRIENDO_ANUAL_CAMION según la patente que se vaya ingresando
+    --Inserta los valores de las variables escalares a la tabla HIST_ARRIENDO_ANUAL_CAMION segÃºn la patente que se vaya ingresando
     INSERT INTO 
         HIST_ARRIENDO_ANUAL_CAMION
     VALUES
@@ -283,9 +283,9 @@ BEGIN ---Inicio de bloquea anonimo
     --Imprime el mensaje por pantalla
     DBMS_OUTPUT.PUT_LINE(v_filas_Insertadas);
 
-    --Si existen camiones que tienen menos de 5 arriendos en el año, se actualiza su valor de arriendo dia y garantia dia
+    --Si existen camiones que tienen menos de 5 arriendos en el aÃ±o, se actualiza su valor de arriendo dia y garantia dia
    IF v_total_veces_arrendado <= 4 THEN
-        --Aquí se calcula según el % ingresado de forma parametrica en la variable Bind
+        --AquÃ­ se calcula segÃºn el % ingresado de forma parametrica en la variable Bind
         v_valor_arriendo_dia_ajustado:=ROUND((v_valor_arriendo_dia * (100 - :b_porcentaje_rebaja))/100);
         v_valor_garantia_dia_ajustado:=ROUND((v_valor_garantia_dia * (100 - :b_porcentaje_rebaja))/100);
         --Se actualiza el valor arriendo dia y valor garantia dia a partir de la patente ingresada de forma parametrica
@@ -307,7 +307,7 @@ END; --Finaliza el bloquea anonimo
 SELECT * FROM HIST_ARRIENDO_ANUAL_CAMION;
 TRUNCATE TABLE HIST_ARRIENDO_ANUAL_CAMION;
 SELECT * FROM camion WHERE nro_patente IN ( 'AHEW11','ASEZ11','BC1002', 'BT1002','VR1003');
-UPDATE CAMION SET VALOR_ARRIENDO_DIA = 14500 WHERE nro_patente = 'ASEZ11';
+UPDATE CAMION SET VALOR_ARRIENDO_DIA = 14500 WHERE nro_patente = 'ASEZ11';*/
 ----------------------------------------------- Caso 4 -----------------------------------------------
 
 
