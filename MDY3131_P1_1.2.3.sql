@@ -1,3 +1,5 @@
+------------------------------------------------------------------------------------------------------
+--                        Jorge Sandoval - MDY3131_002V - Programación de Base de Datos
 ----------------------------------------------- Caso 1 -----------------------------------------------
 SET SERVEROUTPUT ON
 
@@ -150,6 +152,7 @@ v_clave_usuario VARCHAR2(20);
 
 --Inicio de bloque anonimo
 BEGIN
+    --En el siguiente Select se obtiene la información del empleado a partir del rut y se genera el usuario y clave según las condiciones de negocio informadas.
     SELECT
         TO_CHAR(SYSDATE,'MMYYYY'),
         e.numrun_emp,
@@ -218,6 +221,137 @@ SELECT id_estado_civil FROM empleado WHERE numrun_emp = 12456905;
 SELECT id_estado_civil FROM empleado WHERE numrun_emp = 11649964;
 SELECT id_estado_civil FROM empleado WHERE numrun_emp = 12642309;
 */
------------------------------------------------ Caso 2 -----------------------------------------------
---Pronto...
+----------------------------------------------- Caso 3 -----------------------------------------------
+SET SERVEROUTPUT ON
+
+--Declaración de variables bind
+VARIABLE b_anno_proceso NUMBER;
+VARIABLE b_patente_camion VARCHAR2(7);
+VARIABLE b_porcentaje_rebaja NUMBER;
+
+--Asignación de valores de forma parametrica a variables bind
+EXEC :b_anno_proceso:=&ANNO_PROCESO;
+EXEC :b_patente_camion:=UPPER('&Patente_camión');
+EXEC :b_porcentaje_rebaja:=&Porcentaje_rebaja_con_punto_sin_comas;
+
+-----------------------------------Inicio bloque Padre------------------------------------------
+--Declara las variables escalares
+DECLARE
+v_anno_proceso NUMBER;
+v_nro_patente_p VARCHAR2(6);
+v_valor_arriendo_dia NUMBER;
+v_valor_garantia_dia NUMBER;
+v_total_veces_arrendado NUMBER;
+v_filas_Insertadas_p VARCHAR2(160);
+
+BEGIN
+    SELECT
+        :b_anno_proceso,
+        :b_patente_camion,
+        c.valor_arriendo_dia ,
+        c.valor_garantia_dia ,
+        COUNT(ac.id_arriendo)
+    INTO
+       v_anno_proceso,
+       v_nro_patente_p,
+       v_valor_arriendo_dia,
+       v_valor_garantia_dia,
+       v_total_veces_arrendado
+    FROM
+        arriendo_camion ac INNER JOIN camion c ON (ac.nro_patente=c.nro_patente)
+    WHERE
+        ac.nro_patente = :b_patente_camion 
+        AND
+        EXTRACT(YEAR FROM ac.fecha_ini_arriendo) = (:b_anno_proceso) -1
+    GROUP BY
+    :b_anno_proceso,
+    :b_patente_camion,
+    c.valor_arriendo_dia,
+    c.valor_garantia_dia;
+    
+    --Inserta los valores para las patentes consultadas
+    INSERT INTO 
+        HIST_ARRIENDO_ANUAL_CAMION
+    VALUES
+        (v_anno_proceso, v_nro_patente_p, v_valor_arriendo_dia, v_valor_garantia_dia, v_total_veces_arrendado);
+    
+    --Consulta cuantas filas han sido modificadas 
+    v_filas_Insertadas_p:=(SQL%ROWCOUNT||' fila(s) Insertada(s) correctamente en HIST_ARRIENDO_ANUAL_CAMION.');
+    --Imprime el mensaje por pantalla
+    DBMS_OUTPUT.PUT_LINE(v_filas_Insertadas_p);
+    
+    -----------------------------------Inicio bloque Hijo------------------------------------------
+    DECLARE
+    v_nro_patente_h VARCHAR2(6); 
+    v_valor_arriendo_dia_ajustado NUMBER;
+    v_valor_garantia_dia_ajustado NUMBER;
+    v_filas_Insertadas_h VARCHAR2(160);
+    
+    BEGIN 
+        SELECT
+            nro_patente,
+            ROUND((valor_arriendo_dia * (100 - :b_porcentaje_rebaja))/100),
+            ROUND((valor_garantia_dia * (100 - :b_porcentaje_rebaja))/100)
+        INTO
+            v_nro_patente_h,
+            v_valor_arriendo_dia_ajustado,
+            v_valor_garantia_dia_ajustado
+        FROM
+            HIST_ARRIENDO_ANUAL_CAMION
+        WHERE
+            total_veces_arrendado < 5;
+        
+        UPDATE CAMION
+        SET VALOR_ARRIENDO_DIA = v_valor_arriendo_dia_ajustado, VALOR_GARANTIA_DIA = v_valor_garantia_dia_ajustado
+        WHERE nro_patente = v_nro_patente_h;
+        
+        --Consulta cuantas filas han sido modificadas 
+        v_filas_Insertadas_h:=(SQL%ROWCOUNT||' fila(s) Insertada(s) correctamente en CAMION.');
+        --Imprime el mensaje por pantalla
+        DBMS_OUTPUT.PUT_LINE(v_filas_Insertadas_h);
+        
+    END;
+     -----------------------------------Fin bloque Hijo------------------------------------------
+--Permite guardar los cambios realizados
+COMMIT;
+END;
+-----------------------------------Fin bloque Padre------------------------------------------
+--SELECT * FROM camion;
+--SELECT * FROM HIST_ARRIENDO_ANUAL_CAMION;
+--TRUNCATE TABLE HIST_ARRIENDO_ANUAL_CAMION;
+--SELECT * FROM camion;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
