@@ -52,7 +52,7 @@ BEGIN
     FROM -- Aquí se hace un inner join de las 3 tablas que necesitamos. 
         cliente c INNER JOIN tipo_cliente tpc ON (c.cod_tipo_cliente=tpc.cod_tipo_cliente)
         INNER JOIN credito_cliente cc ON (cc.nro_cliente=c.nro_cliente)
-    WHERE -- Aquí comienza la condución de la consulta. 
+    WHERE -- Aquí comienza la condición de la consulta. 
         c.numrun = :b_run_cliente AND -- Acá especificamos que solo queremos los datos del cliente por el cual estamos consultado mediante el run.
         EXTRACT(YEAR FROM cc.fecha_otorga_cred) = (EXTRACT(YEAR FROM SYSDATE) -1) -- Acá extraemos el año de la fecha en que se otorgó el credito y el año de la fecha actual al que le restamos uno. 
         --de este modo solo nos traerá registros de hace un año. 
