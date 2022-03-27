@@ -1,6 +1,7 @@
-------------------------------------------------------------------------------------------------------
+/*------------------------------------------------------------------------------------------------------
 --                        Jorge Sandoval - MDY3131_002V - Programación de Base de Datos
------------------------------------------------ Caso 1 -----------------------------------------------
+--                                            Guia 1.2.3
+----------------------------------------------- Caso 1 -----------------------------------------------*/
 SET SERVEROUTPUT ON
 
 /* Datos a usar de forma parametrica (para copiar al block de notas)
@@ -24,7 +25,7 @@ Buin
 40000
 */
 
---Declaracion de variables bind Año proceso y Run emplado
+--Declaracion de variables bind AÑo proceso y Run emplado
 VARIABLE b_annio_proceso NUMBER;
 VARIABLE b_run_empleado NUMBER;
 
@@ -76,7 +77,7 @@ v_filas_actualizadas VARCHAR2(50);
 
 --Inicio del bloquea anonimo
 BEGIN
-    --Inserta los resultados de la consulta en tabla PROY_MOVILIZACION
+    --Inserta los resultados de la consulta en tabla PROY_MOVILIZACIÓN
     INSERT INTO PROY_MOVILIZACION
     SELECT
         :b_annio_proceso as ANNO_PROCESO,
@@ -231,7 +232,7 @@ VARIABLE b_porcentaje_rebaja NUMBER;
 
 --Asignación de valores de forma parametrica a variables bind
 EXEC :b_anno_proceso:=&ANNO_PROCESO;
-EXEC :b_patente_camion:=UPPER('&Patente_camión');
+EXEC :b_patente_camion:=UPPER('&Patente_cami�n');
 EXEC :b_porcentaje_rebaja:=&Porcentaje_rebaja_con_punto_sin_comas;
 
 --Declara las variables escalares
@@ -285,7 +286,7 @@ BEGIN ---Inicio de bloquea anonimo
 
     --Si existen camiones que tienen menos de 5 arriendos en el año, se actualiza su valor de arriendo dia y garantia dia
    IF v_total_veces_arrendado <= 4 THEN
-        --Aquí se calcula según el % ingresado de forma parametrica en la variable Bind
+        --Aqu� se calcula seg�n el % ingresado de forma parametrica en la variable Bind
         v_valor_arriendo_dia_ajustado:=ROUND((v_valor_arriendo_dia * (100 - :b_porcentaje_rebaja))/100);
         v_valor_garantia_dia_ajustado:=ROUND((v_valor_garantia_dia * (100 - :b_porcentaje_rebaja))/100);
         --Se actualiza el valor arriendo dia y valor garantia dia a partir de la patente ingresada de forma parametrica
@@ -307,11 +308,69 @@ END; --Finaliza el bloquea anonimo
 SELECT * FROM HIST_ARRIENDO_ANUAL_CAMION;
 TRUNCATE TABLE HIST_ARRIENDO_ANUAL_CAMION;
 SELECT * FROM camion WHERE nro_patente IN ( 'AHEW11','ASEZ11','BC1002', 'BT1002','VR1003');
-UPDATE CAMION SET VALOR_ARRIENDO_DIA = 14500 WHERE nro_patente = 'ASEZ11';*/
+UPDATE CAMION SET VALOR_ARRIENDO_DIA = 14500 WHERE nro_patente = 'ASEZ11';
 ----------------------------------------------- Caso 4 -----------------------------------------------
+SET SERVEROUTPUT ON
 
+--Declaración de variables Bind Universales
+VARIABLE B_nro_patente VARCHAR2(6);
+VARIABLE B_valor_multa NUMBER;
 
+--Asignación de valores a variables bind de forma parametrica
+EXEC :B_nro_patente:=UPPER('&Patente_de_Camión');
+EXEC :B_valor_multa:=&Valor_multa_atraso_por_dia;
 
+DECLARE
+v_dias_atraso NUMBER;
+V_valor_multa NUMBER;
+v_anno_mes_proceso NUMBER;
+v_fecha_inicio_arriendo DATE;
+v_dias_solicitados NUMBER;
+v_fecha_devolucion DATE;
+v_valor_garantia_dia NUMBER;
+v_registro_actualizado VARCHAR2(200);
+
+BEGIN
+    
+    SELECT
+        TO_CHAR(SYSDATE,'YYYYMM'),
+        dias_solicitados,
+        fecha_ini_arriendo,
+        fecha_devolucion
+    INTO
+        v_anno_mes_proceso,
+        v_dias_solicitados,
+        v_fecha_inicio_arriendo,
+        v_fecha_devolucion
+    FROM
+        arriendo_camion
+    WHERE
+        nro_patente = :B_nro_patente
+        AND
+        EXTRACT(MONTH FROM fecha_ini_arriendo) = EXTRACT(MONTH FROM SYSDATE)-1
+        AND
+        EXTRACT(YEAR FROM fecha_ini_arriendo) = EXTRACT(YEAR FROM SYSDATE)
+        AND
+        ((fecha_devolucion - fecha_ini_arriendo) - dias_solicitados) >= 1;
+        
+        v_dias_atraso:= (v_fecha_devolucion - v_fecha_inicio_arriendo) - v_dias_solicitados;
+        V_valor_multa:= v_dias_atraso * :B_valor_multa;
+
+    INSERT INTO
+        MULTA_ARRIENDO
+    VALUES (v_anno_mes_proceso,:B_nro_patente,v_fecha_inicio_arriendo,v_dias_solicitados,v_fecha_devolucion,v_dias_atraso,V_valor_multa);
+    
+    --Consulta cuantas filas han sido insertadas
+    v_registro_actualizado:=(SQL%ROWCOUNT||' fila(s) Insertada(s) correctamente en tabla MULTA_ARRIENDO.');
+    --Imprime en pantalla la confirmación
+    DBMS_OUTPUT.PUT_LINE(v_registro_actualizado);
+
+END;
+
+--Sentencias utilizadas para corroborar cargas.
+SELECT * FROM MULTA_ARRIENDO;
+TRUNCATE TABLE MULTA_ARRIENDO;
+DELETE FROM MULTA_ARRIENDO WHERE NRO_PATENTE = 'VR1003';
 
 
 
