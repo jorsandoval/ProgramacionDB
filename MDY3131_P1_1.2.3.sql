@@ -308,7 +308,7 @@ END; --Finaliza el bloquea anonimo
 SELECT * FROM HIST_ARRIENDO_ANUAL_CAMION;
 TRUNCATE TABLE HIST_ARRIENDO_ANUAL_CAMION;
 SELECT * FROM camion WHERE nro_patente IN ( 'AHEW11','ASEZ11','BC1002', 'BT1002','VR1003');
-UPDATE CAMION SET VALOR_ARRIENDO_DIA = 14500 WHERE nro_patente = 'ASEZ11';
+UPDATE CAMION SET VALOR_ARRIENDO_DIA = 14500 WHERE nro_patente = 'ASEZ11';*/
 ----------------------------------------------- Caso 4 -----------------------------------------------
 SET SERVEROUTPUT ON
 
