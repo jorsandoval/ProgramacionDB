@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------------------------------------
---                        Jorge Sandoval - MDY3131_002V - Programación de Base de Datos
+--                        Jorge Sandoval - MDY3131_002V - ProgramaciÃ³n de Base de Datos
 --------------------------------------------------Caso 1--------------------------------------------------
 SET SERVEROUTPUT ON
 
@@ -35,7 +35,7 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('NOMBRE EMPLEADO: ' || v_nombre_emp);
     DBMS_OUTPUT.PUT_LINE('RUN: '|| v_run);
     DBMS_OUTPUT.PUT_LINE('Sueldo: ' || v_sueldo);
-    DBMS_OUTPUT.PUT_LINE('Bonificación extra: '|| :b_bono_extra);
+    DBMS_OUTPUT.PUT_LINE('Bonificaciï¿½n extra: '|| :b_bono_extra);
 END;
 
 --------------------------------------------------Caso 2--------------------------------------------------
@@ -125,11 +125,11 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE(''); 
     DBMS_OUTPUT.PUT_LINE('NOMBRE DEL EMPLEADO: '||v_nombre_emp);
     DBMS_OUTPUT.PUT_LINE('RUN: '|| v_run_emp);
-    DBMS_OUTPUT.PUT_LINE('SIMULACIÓN 1: Aumentar en '|| :b_porcentaje_all || '% el salario de todos los empleados');
+    DBMS_OUTPUT.PUT_LINE('SIMULACIï¿½N 1: Aumentar en '|| :b_porcentaje_all || '% el salario de todos los empleados');
     DBMS_OUTPUT.PUT_LINE('Sueldo actual: '||v_sueldo_act);
     DBMS_OUTPUT.PUT_LINE('Sueldo Reajustado: '|| :b_simulacion_1);
     DBMS_OUTPUT.PUT_LINE('Reajuste: '|| :b_reajuste_1);
-    DBMS_OUTPUT.PUT_LINE('SIMULACIÓN 2: Aumentar en '|| :b_porcentaje_rango || '% el salario de los empleados que poseen salarios entre $200.000 y $400.000');
+    DBMS_OUTPUT.PUT_LINE('SIMULACIï¿½N 2: Aumentar en '|| :b_porcentaje_rango || '% el salario de los empleados que poseen salarios entre $200.000 y $400.000');
     DBMS_OUTPUT.PUT_LINE('Sueldo actual: '||v_sueldo_act);
     DBMS_OUTPUT.PUT_LINE('Sueldo Reajustado: '|| :b_simulacion_2);
     DBMS_OUTPUT.PUT_LINE('Reajuste: '|| :b_reajuste_2);
