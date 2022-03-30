@@ -94,3 +94,123 @@ END; --¡Al fin! aquí termina el bloque anonimo. ¡Taráan! \0/.
 SELECT * FROM CLIENTE_TODOSUMA; --Sentencias utilizadas para corroborar cargas.
 --TRUNCATE TABLE CLIENTE_TODOSUMA; --Sentencias utilizadas para corroborar cargas.
 --DELETE FROM CLIENTE_TODOSUMA WHERE NRO_cliente = 34;*/
+
+----------------------------------------------- Caso 2 -----------------------------------------------
+SET SERVEROUTPUT ON
+
+VAR b_run_cli NUMBER;
+EXEC :b_run_cli :=&Run_cliente;
+VAR b_mmt1 NUMBER;
+VAR b_mmt2 NUMBER;
+VAR b_mmt3 NUMBER;
+VAR b_mmt4 NUMBER;
+VAR b_mmt5 NUMBER;
+
+VAR b_giftcardt1 NUMBER;
+VAR b_giftcardt2 NUMBER;
+VAR b_giftcardt3 NUMBER;
+VAR b_giftcardt4 NUMBER;
+VAR b_giftcardt5 NUMBER;
+
+EXEC :b_run_cli:=&Run_cliente;
+EXEC :b_mmt1:=&Monto_mayor_tramo_1;
+EXEC :b_mmt2:=&Monto_mayor_tramo_2;
+EXEC :b_mmt3:=&Monto_mayor_tramo_3;
+EXEC :b_mmt4:=&Monto_mayor_tramo_4;
+EXEC :b_mmt5:=&Monto_mayor_tramo_5;
+
+EXEC :b_giftcardt1:=&Monto_giftcard_tramo_1;
+EXEC :b_giftcardt2:=&Monto_giftcard_tramo_2;
+EXEC :b_giftcardt3:=&Monto_giftcard_tramo_3;
+EXEC :b_giftcardt4:=&Monto_giftcard_tramo_4;
+EXEC :b_giftcardt5:=&Monto_giftcard_tramo_5;
+
+/*
+EXEC :b_run_cli :=24617341;
+EXEC :b_mmt1 := 900000;
+EXEC :b_mmt2 := 2000000;
+EXEC :b_mmt3 := 5000000;
+EXEC :b_mmt4 := 8000000;
+EXEC :b_mmt5 := 15000000;
+
+EXEC :b_giftcardt1 := 0;
+EXEC :b_giftcardt2 := 50000;
+EXEC :b_giftcardt3 := 100000;
+EXEC :b_giftcardt4 := 200000;
+EXEC :b_giftcardt5 := 300000;
+*/
+DECLARE
+v_nro_cliente NUMBER;
+v_run_clliente VARCHAR2(15);
+v_nombre_cliente VARCHAR2(80);
+v_profesion_oficio VARCHAR2(40);
+v_dia_cumpleano DATE;
+v_monto_giftcard NUMBER;
+v_observacion  VARCHAR2(200) DEFAULT NULL;
+v_monto_total_ahorrado NUMBER DEFAULT NULL;
+v_registro_actualizado VARCHAR2(200);
+
+BEGIN
+
+    SELECT
+        c.nro_cliente,
+        TO_CHAR(c.numrun,'09G999G999')||'-'||c.dvrun,
+        INITCAP(c.pnombre ||' '|| c.snombre ||' '|| c.appaterno ||' '|| c.apmaterno),
+        po.nombre_prof_ofic,
+        c.fecha_nacimiento,
+        pic.monto_total_ahorrado
+    INTO
+        v_nro_cliente,
+        v_run_clliente,
+        v_nombre_cliente,
+        v_profesion_oficio,
+        v_dia_cumpleano,
+        v_monto_total_ahorrado
+    FROM
+        cliente c LEFT JOIN producto_inversion_cliente pic ON (c.nro_cliente=pic.nro_cliente)
+        INNER JOIN profesion_oficio po ON (c.cod_prof_ofic=po.cod_prof_ofic)
+    WHERE
+        c.numrun = :b_run_cli;
+        
+    IF EXTRACT(MONTH FROM v_dia_cumpleano) = EXTRACT(MONTH FROM ADD_MONTHS(SYSDATE,1)) THEN
+        CASE
+            WHEN v_monto_total_ahorrado BETWEEN 0 AND :b_mmt1 THEN
+                v_monto_giftcard:= :b_giftcardt1;
+                v_observacion:=NULL;
+                
+            WHEN v_monto_total_ahorrado BETWEEN (:b_mmt1 + 1) AND :b_mmt2 THEN
+                v_monto_giftcard:= :b_giftcardt2;
+                v_observacion:=NULL;
+                
+            WHEN v_monto_total_ahorrado BETWEEN (:b_mmt2 + 1) AND :b_mmt3 THEN
+                v_monto_giftcard:= :b_giftcardt3;
+                v_observacion:=NULL;
+                
+            WHEN v_monto_total_ahorrado BETWEEN (:b_mmt3 + 1 ) AND :b_mmt4 THEN
+                v_monto_giftcard:= :b_giftcardt4;
+                v_observacion:=NULL;
+                
+            WHEN v_monto_total_ahorrado BETWEEN (:b_mmt3 + 1) AND :b_mmt5 THEN
+                v_monto_giftcard:= :b_giftcardt5;
+                v_observacion:=NULL;
+            ELSE
+                v_monto_giftcard:=0;
+        END CASE;
+    ELSE
+        v_monto_giftcard:=NULL;
+        v_observacion:= 'El cliente no está de cumpleaños en el mes procesado';
+    END IF;
+    
+    INSERT INTO
+        CUMPLEANNO_CLIENTE
+    VALUES
+        (v_nro_cliente, v_run_clliente, v_nombre_cliente, v_profesion_oficio, TO_CHAR(v_dia_cumpleano,'DD " de " MONTH'), v_monto_giftcard, v_observacion );
+    
+    --Consulta cuantas filas han sido insertadas
+    v_registro_actualizado:=(SQL%ROWCOUNT||' fila(s) Insertada(s) correctamente en tabla CUMPLEANNO_CLIENTE.');
+    --Imprime en pantalla la confirmación
+    DBMS_OUTPUT.PUT_LINE(v_registro_actualizado);
+END;
+
+SELECT * FROM CUMPLEANNO_CLIENTE;
+
