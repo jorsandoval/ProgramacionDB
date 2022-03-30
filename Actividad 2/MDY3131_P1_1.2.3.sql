@@ -371,34 +371,4 @@ END;
 SELECT * FROM MULTA_ARRIENDO;
 TRUNCATE TABLE MULTA_ARRIENDO;
 DELETE FROM MULTA_ARRIENDO WHERE NRO_PATENTE = 'VR1003';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+--fin--
